@@ -22,15 +22,15 @@ sbt "testOnly -- -l org.scalatest.tags.Slow" # Exclude slow tests
 # Since we run all tests besides slow tests above, we don't need to use this.
 # sbt "testOnly -- -n com.example.tags.Fast,com.example.tags.Medium"
 
-# Get the list of modified files
-modified_files=$(git diff --name-only)
-
-# Add the modified files to the staging area
-if [[ -n ${modified_files} ]]; then
-    git add "${modified_files}"
-else
-    echo "No modified files to add in $(pwd || true)." >&2
-    echo "Current branch: $(git branch --show-current || true)" >&2
-fi
+# Re-add any files that were modified by formatters
+echo "Re-adding modified files..."
+# Pipeline explanation:
+# 1. git diff --name-only --cached: Lists all files that are staged for commit
+# 2. xargs -I{}: For each line of input (each filename), run the following command,
+#    replacing {} with the filename
+# 3. sh -c '...': Execute the command in a subshell to handle filenames with spaces
+# 4. if [ -f "{}" ]: Check if the file exists before trying to add it
+# 5. || true: Prevent any xargs failures from stopping the script (due to set -e)
+git diff --name-only --cached | xargs -I{} sh -c 'if [ -f "{}" ]; then git add "{}"; fi' || true
 
 echo "All checks passed!"

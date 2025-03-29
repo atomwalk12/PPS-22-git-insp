@@ -1,0 +1,16 @@
+{{ $figureNum := .Page.Scratch.Get "figureNum" }}
+{{ if not $figureNum }}
+    {{ .Page.Scratch.Set "figureNum" 1 }}
+    {{ $figureNum = 1 }}
+{{ else }}
+    {{ .Page.Scratch.Add "figureNum" 1 }}
+    {{ $figureNum = .Page.Scratch.Get "figureNum" }}
+{{ end }}
+
+<!-- trunk-ignore(prettier/SyntaxError) -->
+<figure id="{{ .Get "id" }}" align="{{ .Get "align" }}">
+  <img src="{{ .Get "src" }}" alt="{{ .Get "alt" }}">
+  <figcaption style="text-align: center; margin: 10px auto 35px; line-height: 1.35; color: #888; font-size: 15px; font-weight: normal;">
+    Fig. {{ $figureNum }}: {{ .Get "caption" }}
+  </figcaption>
+</figure>

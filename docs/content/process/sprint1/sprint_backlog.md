@@ -6,12 +6,13 @@ description: "Detailed breakdown of tasks and user stories for Sprint 1's infras
 aliases: ["sprint1-backlog", "infrastructure-tasks", "sprint1-tasks"]
 ShowToc: true
 tags: ["sprint1", "backlog", "project-setup", "planning", "infrastructure"]
-weight: 2
+weight: 299
 ShowBreadCrumbs: true
+TocOpen: true
 summary: "Comprehensive list of tasks and deliverables for Sprint 1 (March 24-30, 2025), focusing on establishing project infrastructure, development environment, and CI/CD pipeline setup."
 ---
 
-
+[TODO] Potentially use a table.
 
 ## Sprint 1 Backlog
 
@@ -74,21 +75,21 @@ summary: "Comprehensive list of tasks and deliverables for Sprint 1 (March 24-30
 - [ ] Define the high-level project architecture and component interactions
 
 
-#### Core Domain Model (1 day)
+#### Core Domain Model (5 story points)
 - [ ] Design repository data model (i.e. classes, methods, etc.)
 - [ ] Design initial API contracts for future HTTP server (OpenAPI/Swagger)
 - [ ] Generate interactive API documentation using Swagger UI
 
-#### Basic Git Operations (1 day)
+#### Basic Git Operations (3 story points)
 - [ ] Implement repository loading functionality using uithub.com
 - [ ] Extract basic repository metadata
 - [ ] Create error handling for invalid repositories
 
-#### Testing (1 day)
+#### Testing (3 story points)
 - [ ] Write unit tests for domain model
 - [ ] Create integration tests for repository loading
 
-#### Documentation and Process (1 day)
+#### Documentation and Process (2 story points)
 - [X] Document the development process
 - [ ] Complete sprint retrospective documentation
 - [ ] Plan for next sprint

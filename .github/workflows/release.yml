@@ -38,12 +38,47 @@ jobs:
           distribution: temurin
       - name: Build JAR
         run: sbt assembly
+
+      # Build LaTeX document
+      - name: Compile LaTeX document
+        uses: xu-cheng/latex-action@v3
+        with:
+          working_directory: docs/report
+          root_file: report.tex
+
+      - name: Check for LaTeX errors and warnings
+        run: |
+          if grep -q "^!" docs/report/report.log; then
+            echo "LaTeX errors found:"
+            grep "^!" docs/report/report.log
+            exit 1
+          elif grep -q "Warning:" docs/report/report.log; then
+            echo "LaTeX warnings found:"
+            grep "Warning:" docs/report/report.log
+            echo "Build completed with warnings."
+          else
+            echo "LaTeX build completed successfully without errors or warnings."
+          fi
+
+      - name: Upload PDF as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: report.pdf
+          path: docs/report/report.pdf
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
       - name: Install dependencies
         run: "[[ -f package-lock.json || -f npm-shrinkwrap.json ]] && npm ci || true"
+
+      # Make the PDF file available for semantic-release to include in the release
+      - name: Copy PDF to assets directory
+        run: |
+          mkdir -p .release-assets
+          cp docs/report/report.pdf .release-assets/
+
       - name: Run semantic-release
         env:
           GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}

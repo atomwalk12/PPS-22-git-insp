@@ -1,0 +1,29 @@
+{{- $url := .Permalink -}}
+{{- $title := .Title -}}
+{{- $author := .Params.author | default site.Params.author -}}
+{{- $date := .Date.Format "January 2006" -}}
+
+<div class="post-citation">
+    <h2>Citation</h2>
+    <p>If you found this post useful for your work, please consider citing it as:</p>
+    
+    <blockquote>
+        {{- with $author -}}
+            {{- if reflect.IsSlice . -}}
+                {{- delimit . ", " -}}
+            {{- else -}}
+                {{- . -}}
+            {{- end -}}
+        {{- end -}}. ({{ $date }}). {{ $title }}. Retrieved from {{ $url }}
+    </blockquote>
+    <p>or</p>
+    <pre>
+<code>@article{
+    title = "{{ $title }}",
+    author = "{{ with $author }}{{- if reflect.IsSlice . -}}{{- delimit . ", " -}}{{- else -}}{{ . }}{{- end -}}{{ end }}",
+    journal = "{{ site.Title }}",
+    year = "{{ .Date.Format "2006" }}",
+    month = "{{ .Date.Format "January" }}",
+    url = "{{ $url }}"
+}</code></pre>
+</div>

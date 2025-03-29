@@ -1,0 +1,47 @@
+name: LaTeX Build
+
+on:
+  push:
+    branches: [ docs/website   ]
+    tags:
+      - v*
+  pull_request:
+    branches: [ docs/website ]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Compile LaTeX document
+      uses: xu-cheng/latex-action@v3
+      with:
+        working_directory: docs/report
+        root_file: report.tex
+
+    - name: Check for LaTeX errors and warnings
+      run: |
+        if grep -q "^!" docs/report/report.log; then
+          echo "LaTeX errors found:"
+          grep "^!" docs/report/report.log
+          exit 1
+        elif grep -q "Warning:" docs/report/report.log; then
+          echo "LaTeX warnings found:"
+          grep "Warning:" docs/report/report.log
+          echo "Build completed with warnings."
+        else
+          echo "LaTeX build completed successfully without errors or warnings."
+        fi
+
+    - name: Upload PDF as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: report.pdf
+        path: docs/report/report.pdf

@@ -1,3 +1,6 @@
 [submodule "docs/website/themes/papermod"]
 	path = docs/website/themes/papermod
-	url = https://github.com/adityatelange/hugo-PaperMod
+	url = https://github.com/atomwalk12/hugo-PaperMod.git
+[submodule "docs/website/themes/hugo-cite"]
+	path = docs/website/themes/hugo-cite
+	url = https://github.com/atomwalk12/hugo-cite.git

@@ -7,7 +7,7 @@ aliases: ["sprint1", "sprint1-overview", "infrastructure-sprint"]
 tags: ["sprint1", "overview", "project-setup", "ci-cd", "infrastructure"]
 ShowToc: true
 TocOpen: true
-weight: 1
+weight: 298
 ShowBreadCrumbs: true
 summary: "First sprint (March 24-30, 2025) dedicated to setting up the project's foundational infrastructure, including Scala 3 environment, development tools, automated checks, testing framework, and CI/CD pipeline."
 ---

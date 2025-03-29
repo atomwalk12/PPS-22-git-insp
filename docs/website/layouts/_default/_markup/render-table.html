@@ -1,0 +1,81 @@
+<!-- trunk-ignore-all(prettier/SyntaxError) -->
+<table
+  {{- range $k, $v := .Attributes }}
+    {{- if $v }}
+      {{- printf " %s=%q" $k $v | safeHTMLAttr }}
+    {{- end }}
+  {{- end }} class="custom_table_style">
+  <thead>
+    {{- range .THead }}
+      <tr>
+        {{- range . }}
+          <th
+            {{- with .Alignment }}
+              {{- printf " style=%q" (printf "text-align: %s" .) | safeHTMLAttr }}
+            {{- end -}}
+          >
+            {{- .Text -}}
+          </th>
+        {{- end }}
+      </tr>
+    {{- end }}
+  </thead>
+  <tbody>
+    {{- range .TBody }}
+      <tr>
+        {{- range . }}
+          <td
+            {{- with .Alignment }}
+              {{- printf " style=%q" (printf "text-align: %s" .) | safeHTMLAttr }}
+            {{- end -}}
+          >
+            {{- .Text -}}
+          </td>
+        {{- end }}
+      </tr>
+    {{- end }}
+  </tbody>
+</table>
+
+<style>
+.post-content table:not(.lntable .highlighttable,.highlight table,.gist .highlight){
+  /* display: table; */
+  background-color: transparent;
+  border-radius: 6px;
+  border: 1px solid black;
+  outline: 2px solid black;
+  overflow-x: auto;
+  table-layout: fixed;
+  word-break: break-all;
+  font-size: 12px;
+}
+
+.dark .post-content table:not(.lntable .highlighttable,.highlight table,.gist .highlight){
+  outline: 2px solid rgb(54, 156, 95);
+}
+
+.post-content table:not(.lntable .highlighttable,.highlight table,.gist .highlight) thead{
+  background-color: #545d7b8a;
+}
+
+.dark .post-content table:not(.lntable .highlighttable,.highlight table,.gist .highlight) thead{
+  background-color: rgb(62, 62, 62);
+}
+
+.post-content table:not(.lntable .highlighttable,.highlight table,.gist .highlight) td,
+.post-content table:not(.lntable .highlighttable,.highlight table,.gist .highlight) tr,
+.post-content table:not(.lntable .highlighttable,.highlight table,.gist .highlight) th{
+  border-bottom: unset;
+  border: 1px solid black,
+}
+
+.post-content table:not(.lntable .highlighttable,.highlight table,.gist .highlight) td:hover,
+.post-content table:not(.lntable .highlighttable,.highlight table,.gist .highlight) td:focus{
+  background-color: rgba(67, 166, 86, 0.8);
+}
+
+.dark .post-content table:not(.lntable .highlighttable,.highlight table,.gist .highlight) td:hover,
+.dark .post-content table:not(.lntable .highlighttable,.highlight table,.gist .highlight) td:focus{
+  background-color: rgb(0, 0, 0, 0.7);
+}
+</style>

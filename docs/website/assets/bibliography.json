@@ -1,0 +1,40 @@
+[
+	{
+		"id": "DNN1",
+		"type": "article-journal",
+		"abstract": "Since its release, the Tensorflow framework has been widely used in various fields due to its advantages in deep learning. However, it is still at its early state. Its native distributed implementation has difficulty in expanding for large models because it has issues of low utilization of multiple GPUs and slow distribution compared with running on single machine. It is of great significance to reduce the training time through parallel models. In view of this, we firstly provided an in-depth analysis of the implementation principle of Tensorflow and identify the bottlenecks of its native distributed parallel models to improve. Then, two optimal algorithms are designed and implemented based on data parallelism and model parallelism modes of Tensorflow. For data parallelism, the proposed algorithm is implemented to replace the native linear execution mode with pipeline execution mode. As for model parallelism, the native random partitioning mode is replaced by our proposed novel greedy algorithm. Finally, we built a homogeneous distributed cluster and a heterogeneous distributed cluster respectively to verify the effectiveness of the proposed algorithms. Through a number of comparative experiments, we showed that the proposed optimal parallel algorithms can effectively reduce model training time by an average of 26.5%(or average 1.5x speedup than native distributed algorithms) and improve the utilization of the cluster while keeping the same accuracy level of native Tensorflow. © 2021, The Author(s), under exclusive licence to Springer Science+Business Media, LLC, part of Springer Nature.",
+		"archive": "Scopus",
+		"container-title": "Applied Intelligence",
+		"DOI": "10.1007/s10489-021-02588-9",
+		"issue": "4",
+		"page": "3880-3900",
+		"title": "Optimal distributed parallel algorithms for deep learning framework Tensorflow",
+		"URL": "https://www.scopus.com/inward/record.uri?eid=2-s2.0-85111778509&doi=10.1007%2fs10489-021-02588-9&partnerID=40&md5=4b83017d376799bb5bb630f933db0ba3",
+		"volume": "52",
+		"author": [
+			{
+				"family": "Xie",
+				"given": "Y."
+			},
+			{
+				"family": "He",
+				"given": "M."
+			},
+			{
+				"family": "Ma",
+				"given": "T."
+			},
+			{
+				"family": "Tian",
+				"given": "W."
+			}
+		],
+		"issued": {
+			"date-parts": [
+				[
+					"2022"
+				]
+			]
+		}
+	}
+]

@@ -1,0 +1,26 @@
+/* Custom table styling for horizontal scrolling */
+.post-content table {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  white-space: nowrap;
+  border-collapse: collapse;
+  margin: 1em 0;
+}
+
+/*
+Improve table cell spacing and borders
+This is replaced by the code from responsive-table.html
+
+.post-content table th,
+.post-content table td {
+  padding: 0.5em 1em;
+  border: 1px solid var(--border);
+}
+
+/* Add hover effect on table rows
+.post-content table tr:hover {
+  background-color: var(--code-bg);
+} 
+*/

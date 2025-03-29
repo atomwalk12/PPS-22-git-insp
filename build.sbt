@@ -44,11 +44,15 @@ wartremoverWarnings --= Seq(
   Wart.ImplicitParameter,
   Wart.Nothing,
   Wart.Equals,
+  Wart.Throw,
+  Wart.Var,
 )
 
 wartremoverErrors ++= Warts.unsafe
 wartremoverErrors --= Seq(
   Wart.Any,
+  Wart.Throw,
+  Wart.Var,
 )
 
 // ------ Trunk ------
@@ -86,6 +90,7 @@ lazy val root = project
       "-new-syntax",
       "-indent",
       "-source:3.3",
+      "-source 3.0-migration",
       // Options for Scalafix
       "-Wunused:imports",
     ),

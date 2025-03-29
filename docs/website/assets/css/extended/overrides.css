@@ -1,0 +1,22 @@
+/* Frontpage layout */
+:root {
+    --main-width: 900px; /* 900px */
+    --nav-width: 1278px; /* main-width * 1.42. Could you also 1278px. */
+}
+
+/* Table settings */
+/*
+This is replaced by the code from responsive-table.html
+body.list tr:hover {background-color: #D6EEEE;}
+body.dark tr:hover {background-color: #6432bd;}
+
+table {
+    width: 100%;
+    table-layout: fixed;
+    border-collapse: collapse;
+    display: table;
+}
+th, td {
+    padding: 8px;
+}
+*/

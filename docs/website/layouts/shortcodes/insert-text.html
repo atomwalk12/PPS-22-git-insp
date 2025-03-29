@@ -1,0 +1,7 @@
+{{ $filename := .Get 0 }}
+{{ $path := printf "static/%s" $filename }}
+{{ if os.FileExists $path }}
+  {{ readFile $path | markdownify }}
+{{ else }}
+  File not found: {{ $filename }}
+{{ end }}
