@@ -1,5 +1,6 @@
 package gitinsp.utils
 
+import com.typesafe.scalalogging.LazyLogging
 import dev.langchain4j.data.document.Document
 import dev.langchain4j.data.document.Metadata
 
@@ -45,28 +46,37 @@ enum Language(val value: String):
       case Language.MARKDOWN => Language.TEXT.value
       case _                 => Language.CODE.value
 
-object GitRepository:
-  def detectLanguage(language: String): Either[Language, List[Language]] =
+object GitRepository extends LazyLogging:
+  def detectLanguage(language: String): Option[List[Language]] =
     Option(language).map(_.trim).flatMap {
       case lang if lang.contains(",") =>
-        Some(Right(
+        Some(
           lang.split(",")
             .toList
             .map(l => findLanguage(l.trim)),
-        ))
+        )
       case lang if lang.nonEmpty =>
-        Some(Left(findLanguage(lang)))
+        Some(List(findLanguage(lang)))
       case _ =>
-        Some(Right(List()))
-    }.getOrElse(Right(List()))
+        Some(List())
+    }.orElse(Some(List()))
 
   private def findLanguage(lang: String): Language =
-    Language.values.find(_.toString == lang).getOrElse(Language.CODE)
+    Language.values.find(_.toString == lang) match
+      case Some(language) => language
+      case None =>
+        val message = s"Unsupported language: $lang"
+        logger.error(message)
+        scala.sys.error(message)
 
   def detectLanguages(languages: String): List[Language] =
     languages.split(",")
       .toList
       .map(l => findLanguage(l.trim))
+
+  def detectLanguageFromFile(filePath: String): Language =
+    val language = filePath.split("\\.").last
+    findLanguage(language)
 
 final case class GitRepository(url: String, languages: List[Language], docs: List[GitDocument]):
   val indexNames: List[IndexName] = languages.map(indexName)
@@ -87,6 +97,17 @@ final case class GitRepository(url: String, languages: List[Language], docs: Lis
 
 final case class IndexName(name: String, language: Language)
 
+object IndexName:
+  def apply(indexName: String): IndexName =
+    val unsanitizedName = URLSanitizerService.unsanitize(indexName)
+    val (repositoryPart, languagePart) = unsanitizedName.lastIndexOf("-") match
+      case idx if idx > 0 => (unsanitizedName.substring(0, idx), unsanitizedName.substring(idx + 1))
+      case _              => (unsanitizedName, "")
+    val language = languagePart match
+      case Language.TEXT.value => Language.MARKDOWN
+      case lang                => Language.values.find(_.toString == lang).getOrElse(Language.CODE)
+    IndexName(repositoryPart, language)
+
 final case class GitDocument(content: String, language: Language, path: String):
   def createLangchainDocument(): Option[Document] =
     Option(content.trim)
@@ -97,3 +118,36 @@ final case class GitDocument(content: String, language: Language, path: String):
           Document.from(trimmedContent, metadata)
         },
       )
+
+object GitDocument extends LazyLogging:
+  def fromGithub(json: String): List[GitDocument] =
+    import io.circe.parser.*
+    import io.circe.Json
+    parse(json) match {
+      case Right(json) =>
+        json.hcursor.downField("files").as[Json] match {
+          case Right(filesJson) =>
+            filesJson.asObject match {
+              case Some(filesObject) =>
+                filesObject.toMap.flatMap {
+                  case (filePath, fileJson) =>
+                    fileJson.hcursor.downField("content").as[String] match {
+                      case Right(content) => {
+                        val language = GitRepository.detectLanguageFromFile(filePath)
+                        Some(GitDocument(content, language, filePath))
+                      }
+                      case Left(_) => None
+                    }
+                }.toList
+              case None =>
+                logger.warn("Files object is not a valid JSON object")
+                List.empty[GitDocument]
+            }
+          case Left(error) =>
+            logger.warn(s"Error accessing files: ${error.getMessage}")
+            List.empty[GitDocument]
+        }
+      case Left(error) =>
+        logger.warn(s"Error parsing JSON: ${error.getMessage}")
+        List.empty[GitDocument]
+    }

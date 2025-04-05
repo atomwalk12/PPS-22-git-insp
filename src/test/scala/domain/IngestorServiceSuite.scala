@@ -11,10 +11,10 @@ import gitinsp.infrastructure.CacheService
 import gitinsp.infrastructure.strategies.IngestionStrategyFactory
 import gitinsp.utils.GitDocument
 import gitinsp.utils.GitRepository
+import gitinsp.utils.IngestorServiceExtensions.ingest
 import gitinsp.utils.Language
 import io.qdrant.client.QdrantClient
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.doNothing
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.times
@@ -29,6 +29,7 @@ import org.scalatestplus.mockito.MockitoSugar
 import java.util.Collections as C
 
 import scala.concurrent.ExecutionContext
+import scala.util.Success
 
 class CacheServiceSuite
     extends AnyFlatSpec
@@ -58,7 +59,7 @@ class CacheServiceSuite
     doReturn(mockEmbeddingModel).when(mockFactory).createTextEmbeddingModel()
     doReturn(mockEmbeddingModel).when(mockFactory).createCodeEmbeddingModel()
     doReturn(mockIngestor).when(mockFactory).createIngestor(any, any, any, any)
-    doNothing().when(mockFactory).createCollection(any(), any(), any())
+    doReturn(Success(())).when(mockFactory).createCollection(any(), any(), any())
 
     when(config.getString("gitinsp.ollama.url")).thenReturn("http://localhost:11434")
     when(config.getString("gitinsp.code-embedding.model")).thenReturn("nomic-embed-text")
@@ -92,6 +93,5 @@ class CacheServiceSuite
       index =>
         val strategy = IngestionStrategyFactory.createStrategy("default", index.language, config)
 
-        import gitinsp.domain.IngestorServiceExtensions.ingest
         verify(mockIngestor, times(1)).ingest(repository, index.language) // once for each language
     }

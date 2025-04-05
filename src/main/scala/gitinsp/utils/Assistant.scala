@@ -16,3 +16,6 @@ object Assistant:
 object URLSanitizerService:
   def sanitize(url: String): String =
     url.replaceAll("^https?://", "").replace("/", "[slash]").replace(":", "[colon]")
+
+  def unsanitize(url: String): String =
+    url.replace("[colon]", ":").replace("[slash]", "/")

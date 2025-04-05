@@ -14,12 +14,12 @@ import dev.langchain4j.service.TokenStream
 import dev.langchain4j.store.embedding.EmbeddingStoreIngestor
 import gitinsp.chatpipeline.RAGComponentFactory
 import gitinsp.domain.ChatService
+import gitinsp.domain.GithubWrapperService
 import gitinsp.domain.IngestorService
 import gitinsp.domain.Pipeline
 import gitinsp.infrastructure.CacheService
 import gitinsp.infrastructure.ContentFormatter
 import gitinsp.infrastructure.strategies.IngestionStrategyFactory
-import gitinsp.tests.ExternalService
 import gitinsp.utils.Assistant
 import gitinsp.utils.GitDocument
 import gitinsp.utils.GitRepository
@@ -67,58 +67,29 @@ class PipelineTest extends AnyFlatSpec with Matchers with MockitoSugar with Befo
     when(config.getInt("gitinsp.code-embedding.chunk-overlap")).thenReturn(200)
     when(config.getInt("gitinsp.text-embedding.chunk-overlap")).thenReturn(200)
 
-  "Pipeline with external services" should "be able to execute" taggedAs ExternalService in:
-    // Setup classes
-    val pipe = Pipeline(using system, materializer, executionContext)
-
-    // Execute
-    val source  = pipe.chat("Hi!", None)
-    val future  = source.map(println).runWith(Sink.seq)
-    val results = Await.result(future, 2.minutes)
-
-  it should "be able to execute with content retrieval" taggedAs ExternalService in:
-    // Setup classes
-    val pipe  = Pipeline(using system, materializer, executionContext)
-    val index = IndexName("test-repo-py", Language.PYTHON)
-
-    // Execute
-    val source  = pipe.chat("Hi!", Some(index))
-    val future  = source.map(println).runWith(Sink.seq)
-    val results = Await.result(future, 2.minutes)
-
-  it should "be able to process documents" taggedAs ExternalService in:
-    // Setup classes
-    val pipeWithExternalServices = Pipeline(using system, materializer, executionContext)
-
-    // Setup data
-    val languages = GitRepository.detectLanguages("scala,md,py")
-    val doc1      = GitDocument("def test()", Language.SCALA, "test.scala")
-    val doc2      = GitDocument("# Hello, world!", Language.MARKDOWN, "test.md")
-    val doc3      = GitDocument("print('Hello, world!')", Language.PYTHON, "test.py")
-    val docs      = List(doc1, doc1, doc2, doc3)
-    val repo      = GitRepository("test-repo", languages, docs)
-
-    // Execute
-    val source = pipeWithExternalServices.regenerateIndex(repo)
-
   "Pipeline" should "allow dependency injection for easier testing" in:
     // Create mocks
-    val mockChatService  = mock[ChatService]
-    val mockCacheService = mock[CacheService]
-    val mockAssistant    = mock[Assistant]
-    val mockResponse     = Source.single("Mocked response")
+    val mockChatService   = mock[ChatService]
+    val mockCacheService  = mock[CacheService]
+    val mockAssistant     = mock[Assistant]
+    val mockResponse      = Source.single("Mocked response")
+    val mockGithubWrapper = mock[GithubWrapperService]
 
     // Set up mocks behavior
     when(mockCacheService.getAIService(None)).thenReturn(mockAssistant)
     when(mockChatService.chat("Test query", mockAssistant)).thenReturn(mockResponse)
 
     // Execute the pipeline
-    val pipe   = Pipeline(mockChatService, mockCacheService, mockIngestorService)
+    val pipe   = Pipeline(mockChatService, mockCacheService, mockIngestorService, mockGithubWrapper)
     val index  = None
     val result = pipe.chat("Test query", index)
 
     // Verify
-    result shouldBe mockResponse
+    result.isSuccess shouldBe true
+    result.fold(
+      ex => fail(s"Expected success but got failure: $ex"),
+      response => response shouldBe mockResponse,
+    )
     verify(mockCacheService).getAIService(None)
     verify(mockChatService).chat("Test query", mockAssistant)
 
@@ -128,8 +99,9 @@ class PipelineTest extends AnyFlatSpec with Matchers with MockitoSugar with Befo
     val mockStreamingModel = mock[OllamaStreamingChatModel]
     val mockAugmentor      = mock[RetrievalAugmentor]
     val mockTokenStream    = mock[TokenStream]
+    val mockGithubWrapper  = mock[GithubWrapperService]
 
-    val pipe = Pipeline(mockChatService, mockCacheService, mockIngestorService)
+    val pipe = Pipeline(mockChatService, mockCacheService, mockIngestorService, mockGithubWrapper)
 
     // Setup data
     val mockSource = Source(List("Test response 1", "Test response 2"))
@@ -144,14 +116,19 @@ class PipelineTest extends AnyFlatSpec with Matchers with MockitoSugar with Befo
     doReturn(mockSource).when(mockChatService).chat(any(), any())
 
     // Execute
-    val index   = IndexName("test-repo", Language.SCALA)
-    val result  = pipe.chat("Test query", Some(index))
-    val future  = result.runWith(Sink.seq)
-    val results = Await.result(future, 5.seconds)
+    val index     = IndexName("test-repo", Language.SCALA)
+    val tryResult = pipe.chat("Test query", Some(index))
+    tryResult.fold(
+      ex => fail(s"Expected success but got failure: $ex"),
+      result => {
+        val future  = result.runWith(Sink.seq)
+        val results = Await.result(future, 5.seconds)
 
-    // Verify
-    verify(mockCacheService).getAIService(Some(index))
-    results should contain theSameElementsAs List("Test response 1", "Test response 2")
+        // Verify
+        verify(mockCacheService).getAIService(Some(index))
+        results should contain theSameElementsAs List("Test response 1", "Test response 2")
+      },
+    )
 
   it should "ingest the repository" in:
     // Mocks
@@ -160,6 +137,7 @@ class PipelineTest extends AnyFlatSpec with Matchers with MockitoSugar with Befo
     val mockEmbeddingModel = mock[OllamaEmbeddingModel]
     val mockIngestor       = mock[EmbeddingStoreIngestor]
     val mockFactory        = spy(RAGComponentFactory(config))
+    val mockGithubWrapper  = mock[GithubWrapperService]
 
     // Setup mocks
     doReturn(mockIngestor).when(mockCacheService).getIngestor(any, any)
@@ -177,7 +155,7 @@ class PipelineTest extends AnyFlatSpec with Matchers with MockitoSugar with Befo
     val ingestorService = IngestorService(mockCacheService, config)
 
     // Setup data
-    val pipe      = Pipeline(mockChatService, mockCacheService, ingestorService)
+    val pipe      = Pipeline(mockChatService, mockCacheService, ingestorService, mockGithubWrapper)
     val languages = GitRepository.detectLanguages("scala,md")
     val doc1      = GitDocument("def test()", Language.SCALA, "test.scala")
     val doc2      = GitDocument("# Hello, world!", Language.MARKDOWN, "test.md")
@@ -192,6 +170,53 @@ class PipelineTest extends AnyFlatSpec with Matchers with MockitoSugar with Befo
       index =>
         val strategy = IngestionStrategyFactory.createStrategy("default", index.language, config)
 
-        import gitinsp.domain.IngestorServiceExtensions.ingest
+        import gitinsp.utils.IngestorServiceExtensions.ingest
         verify(mockIngestor, times(2)).ingest(repo, index.language)
     }
+
+  it should "list indexes" in:
+    // Setup mocks
+    val mockQdrantClient  = mock[QdrantClient]
+    val mockGithubWrapper = mock[GithubWrapperService]
+    val mockCacheService  = mock[CacheService]
+
+    val index1    = IndexName("index1-scala", Language.SCALA)
+    val index2    = IndexName("index2-md", Language.MARKDOWN)
+    val indexes   = List(index1, index2)
+    val mockValue = F.immediateFuture(java.util.Arrays.asList(index1.name, index2.name))
+    when(mockCacheService.qdrantClient).thenReturn(mockQdrantClient)
+    when(mockQdrantClient.listCollectionsAsync()).thenReturn(mockValue)
+
+    // Execute
+    val pipe = Pipeline(mockChatService, mockCacheService, mockIngestorService, mockGithubWrapper)
+    val tryResults = pipe.listIndexes()
+
+    tryResults.isSuccess shouldBe true
+    val results = tryResults.fold(
+      ex => fail(s"Expected success but got failure: $ex"),
+      results => results,
+    )
+    results should have length 2
+    results should contain(IndexName("index1", Language.SCALA))
+    results should contain(IndexName("index2", Language.MARKDOWN))
+
+  it should "throw an exception when the qdrant client fails" in:
+    // Setup mocks
+    val mockGithubWrapper = mock[GithubWrapperService]
+    val mockQdrantClient  = mock[QdrantClient]
+    val mockCacheService  = mock[CacheService]
+
+    // Setup mocks
+    when(mockCacheService.qdrantClient).thenReturn(mockQdrantClient)
+    val exception = new RuntimeException("QdrantClient failed")
+    when(mockQdrantClient.listCollectionsAsync()).thenThrow(exception)
+
+    // Execute
+    val pipe = Pipeline(mockChatService, mockCacheService, mockIngestorService, mockGithubWrapper)
+    val tryResults = pipe.listIndexes()
+
+    tryResults.isFailure shouldBe true
+    tryResults.failed.fold(
+      ex => ex shouldBe a[RuntimeException],
+      _ => fail("Expected failure but got success"),
+    )

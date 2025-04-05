@@ -26,13 +26,10 @@ import gitinsp.infrastructure.ContentFormatter
 import gitinsp.infrastructure.strategies.IngestionStrategy
 import gitinsp.utils.Assistant
 import gitinsp.utils.Language
-import io.grpc.StatusRuntimeException
 import io.qdrant.client.QdrantClient
 import io.qdrant.client.QdrantGrpcClient
 import io.qdrant.client.grpc.Collections
 import io.qdrant.client.grpc.Collections.Distance
-
-import java.util.concurrent.ExecutionException
 
 import scala.jdk.CollectionConverters.*
 import scala.util.Try
@@ -325,7 +322,7 @@ class RAGComponentFactoryImpl(config: Config) extends RAGComponentFactory with L
     *
     * @param name The name of the collection
     */
-  override def createCollection(name: String, client: QdrantClient, distance: Distance): Unit =
+  override def createCollection(name: String, client: QdrantClient, distance: Distance): Try[Unit] =
     val dimension = config.getInt("gitinsp.qdrant.dimension")
     Try {
       client.createCollectionAsync(
@@ -337,13 +334,6 @@ class RAGComponentFactoryImpl(config: Config) extends RAGComponentFactory with L
           .build(),
       ).get()
       logger.info(s"Collection '$name' created successfully with dimension $dimension")
-    }.recover {
-      case e: ExecutionException =>
-        logger.warn(s"Error creating collection '$name': ${e.getMessage}")
-      case e: StatusRuntimeException =>
-        logger.warn(s"gRPC error creating collection '$name': ${e.getMessage}")
-      case e: InterruptedException =>
-        logger.warn(s"Operation interrupted while creating collection '$name': ${e.getMessage}")
     }
 
 /** A custom router that uses a query routing strategy.
@@ -494,4 +484,4 @@ trait RAGComponentFactory:
     *
     * @param name The name of the collection
     */
-  def createCollection(name: String, client: QdrantClient, distance: Distance): Unit
+  def createCollection(name: String, client: QdrantClient, distance: Distance): Try[Unit]

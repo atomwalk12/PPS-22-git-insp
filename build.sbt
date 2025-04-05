@@ -114,5 +114,8 @@ lazy val root = project
       "com.typesafe.akka" %% "akka-http" % "10.5.3",
       "com.typesafe.akka" %% "akka-stream" % "2.8.8",
       "com.tngtech.archunit" % "archunit" % "1.4.0",
+
+      // JSON dependencie
+      "io.circe" %% "circe-parser" % "0.14.5",
     ),
   )

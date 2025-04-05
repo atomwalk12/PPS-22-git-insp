@@ -2,62 +2,14 @@ package gitinsp.domain
 
 import com.typesafe.config.Config
 import com.typesafe.config.ConfigFactory
-import com.typesafe.scalalogging.LazyLogging
-import dev.langchain4j.data.document.Document
-import dev.langchain4j.store.embedding.EmbeddingStoreIngestor
 import gitinsp.infrastructure.CacheService
 import gitinsp.infrastructure.strategies.IngestionStrategyFactory
 import gitinsp.utils.GitRepository
-import gitinsp.utils.IndexName
-import gitinsp.utils.Language
-import io.grpc.StatusRuntimeException
-import io.qdrant.client.QdrantClient
+import gitinsp.utils.IngestorServiceExtensions.ingest
+import gitinsp.utils.QdrantClientExtensions.delete
+import gitinsp.utils.QdrantClientExtensions.listCollections
 import io.qdrant.client.grpc.Collections
 import io.qdrant.client.grpc.Collections.Distance.Cosine
-
-import java.util.concurrent.ExecutionException
-
-import scala.jdk.CollectionConverters.ListHasAsScala
-import scala.util.Try
-
-object IngestorServiceExtensions:
-  extension (ingestor: EmbeddingStoreIngestor)
-    def ingest(repository: GitRepository, lang: Language): Unit =
-      repository.docs.filter(_.language == lang).foreach(
-        doc => doc.createLangchainDocument().fold(())(ingestor.ingest),
-      )
-
-object QdrantClientExtensions extends LazyLogging:
-  extension (qdrantClient: QdrantClient)
-    def delete(index: IndexName): Unit =
-      Try {
-        qdrantClient.deleteCollectionAsync(index.name).get
-      }.recover {
-        case e: ExecutionException =>
-          logger.warn(s"Error deleting collection ${index.name}: ${e.getMessage}")
-        case e: StatusRuntimeException =>
-          logger.warn(s"gRPC error deleting collection ${index.name}: ${e.getMessage}")
-        case e: InterruptedException =>
-          logger.warn(s"Operation interrupted while deleting ${index.name}: ${e.getMessage}")
-      }
-
-    def listCollections(): Try[List[String]] =
-      Try {
-        qdrantClient.listCollectionsAsync().get().asScala.toList
-      }.recover {
-        case e: ExecutionException =>
-          logger.warn(s"Error listing collections: ${e.getMessage}")
-          List.empty
-        case e: StatusRuntimeException =>
-          logger.warn(s"gRPC error listing collections: ${e.getMessage}")
-          List.empty
-        case e: InterruptedException =>
-          logger.warn(s"Operation interrupted while listing collections: ${e.getMessage}")
-          List.empty
-      }
-
-import QdrantClientExtensions.*
-import IngestorServiceExtensions.*
 
 trait IngestorService:
   def ingest(repository: GitRepository): Unit
