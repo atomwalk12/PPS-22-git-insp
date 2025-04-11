@@ -47,24 +47,16 @@ class CacheServiceSuite
   )
 
   // Create the mocks
-  val config             = mock[Config]
+  val config             = setupConfig()
   val mockFactory        = spy(RAGComponentFactory(config))
   val mockQdrantClient   = mock[QdrantClient]
   val scoringModel       = mock[ScoringModel]
   val mockEmbeddingModel = mock[OllamaEmbeddingModel]
   val mockIngestor       = mock[EmbeddingStoreIngestor]
 
-  override def beforeAll(): Unit =
-    // Setup behavior
-    doReturn(mockQdrantClient).when(mockFactory).createQdrantClient()
-    doReturn(F.immediateFuture(C.emptyList[String]())).when(mockQdrantClient).listCollectionsAsync()
-    doReturn(scoringModel).when(mockFactory).createScoringModel()
-    doReturn(mockEmbeddingModel).when(mockFactory).createTextEmbeddingModel()
-    doReturn(mockEmbeddingModel).when(mockFactory).createCodeEmbeddingModel()
-    doReturn(mockIngestor).when(mockFactory).createIngestor(any, any, any, any)
-    doReturn(Success(())).when(mockFactory).createCollection(any(), any(), any())
+  def setupConfig() =
+    val config = mock[Config]
 
-    // Setup the config
     when(config.getString("gitinsp.ollama.url")).thenReturn("http://localhost:11434")
     when(config.getString("gitinsp.code-embedding.model")).thenReturn("nomic-embed-text")
     when(config.getString("gitinsp.text-embedding.model")).thenReturn("nomic-embed-text")
@@ -75,6 +67,18 @@ class CacheServiceSuite
     when(config.getInt("gitinsp.code-embedding.chunk-overlap")).thenReturn(200)
     when(config.getInt("gitinsp.text-embedding.chunk-overlap")).thenReturn(200)
     when(config.getInt("gitinsp.qdrant.dimension")).thenReturn(768)
+    when(config.getString("gitinsp.models.provider")).thenReturn("ollama")
+
+    config
+  override def beforeAll(): Unit =
+    // Setup behavior
+    doReturn(mockQdrantClient).when(mockFactory).createQdrantClient()
+    doReturn(F.immediateFuture(C.emptyList[String]())).when(mockQdrantClient).listCollectionsAsync()
+    doReturn(scoringModel).when(mockFactory).createScoringModel()
+    doReturn(mockEmbeddingModel).when(mockFactory).createTextEmbeddingModel()
+    doReturn(mockEmbeddingModel).when(mockFactory).createCodeEmbeddingModel()
+    doReturn(mockIngestor).when(mockFactory).createIngestor(any, any, any, any)
+    doReturn(Success(())).when(mockFactory).createCollection(any(), any(), any())
 
   "IngestorService" should "create an ingestor for text and code" in:
     // Data setup

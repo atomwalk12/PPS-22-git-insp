@@ -16,7 +16,7 @@ import gitinsp.infrastructure.ContentService
 import gitinsp.infrastructure.GithubWrapperService
 import gitinsp.infrastructure.factories.RAGComponentFactoryImpl
 import gitinsp.infrastructure.strategies.IngestionStrategyFactory
-import gitinsp.tests.ExternalService
+import gitinsp.tests.externalServiceTag
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.spy
 import org.scalatest.BeforeAndAfterAll
@@ -30,7 +30,6 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.duration.DurationInt
 import scala.util.Failure
 import scala.util.Success
-
 class CoordinatorSuite extends AnyFlatSpec with Matchers with MockitoSugar with BeforeAndAfterAll
     with BeforeAndAfterEach
     with LazyLogging:
@@ -50,7 +49,7 @@ class CoordinatorSuite extends AnyFlatSpec with Matchers with MockitoSugar with 
   val pipeline        = Pipeline(chatService, cacheService, ingestorService, gitWrapper)
   val coordinator     = LangchainCoordinator(pipeline, gitWrapper, prettyFmt = true)
 
-  "Langchain Coordinator" should "be able to list indexes" taggedAs ExternalService in:
+  "Langchain Coordinator" should "be able to list indexes" taggedAs externalServiceTag in:
     // Execute directly against Pipeline instead of through the coordinator
     val indexesTry = coordinator.listIndexes()
     val response   = Marshal(indexesTry)
@@ -61,7 +60,7 @@ class CoordinatorSuite extends AnyFlatSpec with Matchers with MockitoSugar with 
     // Extract and verify the indexes
     indexesTry.foreach { _.nonEmpty shouldBe true }
 
-  it should "be able to delete an index" taggedAs ExternalService in:
+  it should "be able to delete an index" taggedAs externalServiceTag in:
     // ==========================
     // First we generate an index
     // ==========================
@@ -105,7 +104,7 @@ class CoordinatorSuite extends AnyFlatSpec with Matchers with MockitoSugar with 
     }
     deleteTry.isSuccess shouldBe true
 
-  it should "be able to chat with the default model (no retrieval)" taggedAs ExternalService in:
+  it should "be able to chat with the default model (no retrieval)" taggedAs externalServiceTag in:
     // Execute
     val tryResult = coordinator.chat("What is the main function of the project?", None)
 
@@ -118,7 +117,7 @@ class CoordinatorSuite extends AnyFlatSpec with Matchers with MockitoSugar with 
       },
     )
 
-  it should "be able to chat with an index" taggedAs ExternalService in:
+  it should "be able to chat with an index" taggedAs externalServiceTag in:
     // Data setup
     val indexName = "https://github.com/langchain-ai/langchain"
 

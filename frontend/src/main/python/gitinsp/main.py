@@ -14,7 +14,7 @@ class ChatInterface:
         self.pretty_fmt = pretty_fmt
 
 
-    def fix_misencoded_utf8(s):
+    def fix_misencoded_utf8(self, s):
         """Fix incorrectly encoded UTF-8 strings."""
         try:
             # Try to encode the string as latin1 and then decode as UTF-8

@@ -36,8 +36,11 @@ jobs:
         with:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: temurin
-      - name: Build JAR
-        run: sbt assembly
+      - name: Build JAR for backend
+        run: sbt backend/assembly
+
+      - name: Build optimized JavaScript for frontend
+        run: sbt "frontend/fullLinkJS"
 
       # Build LaTeX document
       - name: Compile LaTeX document

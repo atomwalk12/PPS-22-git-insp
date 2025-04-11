@@ -5,9 +5,9 @@ import com.typesafe.config.Config
 import com.typesafe.scalalogging.LazyLogging
 import dev.langchain4j.data.document.DocumentTransformer
 import dev.langchain4j.memory.chat.MessageWindowChatMemory
+import dev.langchain4j.model.chat.StreamingChatLanguageModel
 import dev.langchain4j.model.ollama.OllamaChatModel
 import dev.langchain4j.model.ollama.OllamaEmbeddingModel
-import dev.langchain4j.model.ollama.OllamaStreamingChatModel as StreamingModel
 import dev.langchain4j.model.scoring.ScoringModel
 import dev.langchain4j.model.scoring.onnx.OnnxScoringModel
 import dev.langchain4j.rag.DefaultRetrievalAugmentor
@@ -45,6 +45,7 @@ object RAGComponentFactory:
   * @param config The application configuration
   */
 class RAGComponentFactoryImpl(config: Config) extends RAGComponentFactory with LazyLogging:
+  private val chatModelFactory = ChatModelFactoryProvider.create(config)
 
   /** Creates a retriever for the specified index.
     *
@@ -167,17 +168,10 @@ class RAGComponentFactoryImpl(config: Config) extends RAGComponentFactory with L
 
   /** Creates a streaming chat model.
     *
-    * @return An OllamaStreamingChatModel
+    * @return A streaming chat model implementation
     */
-  override def createStreamingChatModel(): StreamingModel =
-    val modelName = config.getString("gitinsp.models.default-model")
-    val baseUrl   = config.getString("gitinsp.ollama.url")
-    logger.debug(s"Creating streaming chat model with model=$modelName, url=$baseUrl")
-    StreamingModel
-      .builder()
-      .baseUrl(baseUrl)
-      .modelName(modelName)
-      .build()
+  override def createStreamingChatModel(): StreamingChatLanguageModel =
+    chatModelFactory.createStreamingChatModel()
 
   /** Creates an embedding model optimized for the specified language.
     *
@@ -217,7 +211,7 @@ class RAGComponentFactoryImpl(config: Config) extends RAGComponentFactory with L
     * @return A streaming assistant
     */
   override def createAssistant(
-    chatModel: StreamingModel,
+    chatModel: StreamingChatLanguageModel,
     retrievalAugmentor: Option[RetrievalAugmentor],
   ): Assistant =
     val memory = config.getInt("gitinsp.chat.memory")

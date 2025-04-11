@@ -46,16 +46,15 @@ class AnalysisTest
     with MockitoSugar
     with ScalaFutures:
 
-  val mockConfig = mock[Config]
+  val mockConfig = setupConfig()
 
-  // Create a mock configuration
-  override def beforeEach(): Unit =
-    super.beforeEach()
-    org.mockito.Mockito.reset(mockConfig)
-
-    // Config mock setup
-    when(mockConfig.getString("gitinsp.ollama.url")).thenReturn("http://localhost:11434")
-    when(mockConfig.getString("gitinsp.models.default-model")).thenReturn("llama3.1")
+  def setupConfig() =
+    val config = mock[Config]
+    when(config.getString("gitinsp.ollama.url")).thenReturn("http://localhost:11434")
+    when(config.getString("gitinsp.models.default-model")).thenReturn("llama3.1")
+    when(config.getString("gitinsp.models.provider")).thenReturn("ollama")
+    when(config.getBoolean("gitinsp.rag.use-conditional-rag")).thenReturn(true)
+    config
 
   "The RAG Component Factory" should "be able to create a streaming chat model" in:
     val mockFactory = mock[RAGComponentFactoryImpl]
@@ -188,7 +187,6 @@ class AnalysisTest
   it should "create RouterWithStrategy when conditional RAG is enabled" in:
     // Setup
     val mockChat         = mock[OllamaChatModel]
-    val mockConfig       = mock[Config]
     val mockScoringModel = mock[ScoringModel]
     val factory          = new RAGComponentFactoryImpl(mockConfig)
 
@@ -208,7 +206,6 @@ class AnalysisTest
 
   it should "create a content aggregator" in:
     // Setup
-    val mockConfig       = mock[Config]
     val mockScoringModel = mock[ScoringModel]
     val factory          = new RAGComponentFactoryImpl(mockConfig)
 

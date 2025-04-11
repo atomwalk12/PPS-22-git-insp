@@ -901,8 +901,5 @@ object RecursiveCharacterTextSplitter {
           " ",
           "",
         )
-      // Add cases for other languages as needed
-      case _ => throw new IllegalArgumentException(f"Language ${language} is not implemented yet!")
-
     }
 }

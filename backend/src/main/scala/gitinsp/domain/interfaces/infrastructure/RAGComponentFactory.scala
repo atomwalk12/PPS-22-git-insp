@@ -1,7 +1,7 @@
 package gitinsp.domain.interfaces.infrastructure
+import dev.langchain4j.model.chat.StreamingChatLanguageModel
 import dev.langchain4j.model.ollama.OllamaChatModel
 import dev.langchain4j.model.ollama.OllamaEmbeddingModel
-import dev.langchain4j.model.ollama.OllamaStreamingChatModel as StreamingModel
 import dev.langchain4j.model.scoring.ScoringModel
 import dev.langchain4j.rag.DefaultRetrievalAugmentor
 import dev.langchain4j.rag.RetrievalAugmentor
@@ -94,9 +94,9 @@ trait RAGComponentFactory:
 
   /** Creates a streaming chat model.
     *
-    * @return An OllamaStreamingChatModel
+    * @return A streaming chat model implementation
     */
-  def createStreamingChatModel(): StreamingModel
+  def createStreamingChatModel(): StreamingChatLanguageModel
 
   /** Create model router
     *
@@ -110,7 +110,10 @@ trait RAGComponentFactory:
     * @param augmentor The retrieval augmentor
     * @return A StreamingAssistant
     */
-  def createAssistant(model: StreamingModel, augmentor: Option[RetrievalAugmentor]): Assistant
+  def createAssistant(
+    model: StreamingChatLanguageModel,
+    augmentor: Option[RetrievalAugmentor],
+  ): Assistant
 
   /** Creates an embedding store.
     *

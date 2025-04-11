@@ -79,6 +79,7 @@ lazy val commonSettings = Seq(
     // Enable Scala 3 indentation syntax
     "-new-syntax",
     "-indent",
+    "-feature",
     "-source:3.3",
     // Options for Scalafix
     "-Wunused:imports",
@@ -107,6 +108,7 @@ lazy val backend = project
     name := "gitinsp-backend",
     // Explicitly set Test/fork to true for backend
     Test / fork := true,
+    Test / baseDirectory := file("."),
     Compile / mainClass := Some("gitinsp.application.GitInspector"),
     assembly / assemblyMergeStrategy := {
       case PathList("META-INF", _*) => MergeStrategy.discard
@@ -116,11 +118,13 @@ lazy val backend = project
 
     libraryDependencies ++= commonDependencies ++ Seq(
       // Langchain4j dependencies
-      "dev.langchain4j" % "langchain4j" % "1.0.0-beta1" % Test,
-      "dev.langchain4j" % "langchain4j-ollama" % "1.0.0-beta1",
-      "dev.langchain4j" % "langchain4j-qdrant" % "1.0.0-beta1",
-      "dev.langchain4j" % "langchain4j-easy-rag" % "1.0.0-beta1",
-      "dev.langchain4j" % "langchain4j-onnx-scoring" % "1.0.0-beta1",
+      "dev.langchain4j" % "langchain4j" % "1.0.0-beta2" % Test,
+      "dev.langchain4j" % "langchain4j-ollama" % "1.0.0-beta2",
+      "dev.langchain4j" % "langchain4j-qdrant" % "1.0.0-beta2",
+      "dev.langchain4j" % "langchain4j-easy-rag" % "1.0.0-beta2",
+      "dev.langchain4j" % "langchain4j-onnx-scoring" % "1.0.0-beta2",
+      "dev.langchain4j" % "langchain4j-vertex-ai-gemini" % "1.0.0-beta2",
+      "dev.langchain4j" % "langchain4j-anthropic" % "1.0.0-beta2",
       "com.microsoft.onnxruntime" % "onnxruntime_gpu" % "1.20.0",
 
       // Akka dependencies

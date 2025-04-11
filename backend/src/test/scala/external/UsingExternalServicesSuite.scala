@@ -19,7 +19,7 @@ import gitinsp.infrastructure.CacheService
 import gitinsp.infrastructure.ContentService
 import gitinsp.infrastructure.FetchingService
 import gitinsp.infrastructure.GithubWrapperService
-import gitinsp.tests.ExternalService
+import gitinsp.tests.externalServiceTag
 import org.mockito.Mockito.spy
 import org.mockito.Mockito.when
 import org.scalatest.BeforeAndAfterAll
@@ -66,7 +66,7 @@ class UsingExternalServicesSuite extends AnyFlatSpec with Matchers with MockitoS
     when(config.getInt("gitinsp.text-embedding.chunk-overlap")).thenReturn(200)
     when(config.getInt("gitinsp.timeout")).thenReturn(5000)
 
-  "Pipeline with external services" should "be able to execute" taggedAs ExternalService in:
+  "Pipeline with external services" should "be able to execute" taggedAs externalServiceTag in:
     // Setup
     val pipe = Pipeline(mockChatService, mockCacheService, mockIngestorService, githubService)
 
@@ -92,7 +92,7 @@ class UsingExternalServicesSuite extends AnyFlatSpec with Matchers with MockitoS
       },
     )
 
-  it should "be able to execute with content retrieval" taggedAs ExternalService in:
+  it should "be able to execute with content retrieval" taggedAs externalServiceTag in:
     // Setup
     val pipe  = Pipeline(mockChatService, mockCacheService, mockIngestorService, githubService)
     val index = url.toAIServiceURL()
@@ -118,7 +118,7 @@ class UsingExternalServicesSuite extends AnyFlatSpec with Matchers with MockitoS
       },
     )
 
-  it should "be able to process documents" taggedAs ExternalService in:
+  it should "be able to process documents" taggedAs externalServiceTag in:
     // Setup classes
     val pipe = Pipeline(mockChatService, mockCacheService, mockIngestorService, githubService)
 
@@ -133,7 +133,7 @@ class UsingExternalServicesSuite extends AnyFlatSpec with Matchers with MockitoS
     // Execute
     val source = pipe.regenerateIndex(repo)
 
-  "GithubWrapperService" should "successfully fetch a repository" taggedAs ExternalService in:
+  "GithubWrapperService" should "successfully fetch a repository" taggedAs externalServiceTag in:
     // Create the service with mock config
     val service = GithubWrapperService(config, FetchingService())
 
@@ -154,7 +154,7 @@ class UsingExternalServicesSuite extends AnyFlatSpec with Matchers with MockitoS
       case Failure(ex) =>
         fail(s"Repository fetch failed: ${ex.getMessage}")
 
-  it should "successfully fetch plain text" taggedAs ExternalService in:
+  it should "successfully fetch plain text" taggedAs externalServiceTag in:
     // Create the service with mock config
     val service = GithubWrapperService(config, FetchingService())
 

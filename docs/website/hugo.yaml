@@ -42,8 +42,11 @@ languages:
         - name: Tags
           url: tags
           weight: 10
-        - name: ScalaDoc
-          url: scaladoc
+        - name: Backend ScalaDoc
+          url: backend/scaladoc
+          weight: 15
+        - name: Frontend ScalaDoc
+          url: frontend/scaladoc
           weight: 15
         - name: Coverage
           url: https://app.codecov.io/gh/atomwalk12/pps-22-git-insp
@@ -117,8 +120,12 @@ params:
             <td><a href="https://github.com/atomwalk12/pps-22-git-insp/releases/">https://github.com/atomwalk12/pps-22-git-insp/releases/</a></td>
           </tr>
           <tr>
-            <td><strong>ScalaDoc</strong></td>
-            <td><a href="https://atomwalk12.github.io/PPS-22-git-insp/scaladoc/">https://atomwalk12.github.io/PPS-22-git-insp/scaladoc/</a></td>
+            <td><strong>Backend ScalaDoc</strong></td>
+            <td><a href="https://atomwalk12.github.io/PPS-22-git-insp/backend/scaladoc/">https://atomwalk12.github.io/PPS-22-git-insp/backend/scaladoc/</a></td>
+          </tr>
+          <tr>
+            <td><strong>Frontend ScalaDoc</strong></td>
+            <td><a href="https://atomwalk12.github.io/PPS-22-git-insp/frontend/scaladoc/">https://atomwalk12.github.io/PPS-22-git-insp/frontend/scaladoc/</a></td>
           </tr>
           <tr>
             <td><strong>Coverage</strong></td>

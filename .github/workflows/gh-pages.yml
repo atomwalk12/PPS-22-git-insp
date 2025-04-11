@@ -56,13 +56,21 @@ jobs:
       - name: Update theme to Latest commit
         run: git submodule update --remote --merge
 
-      - name: Generate ScalaDoc
-        run: sbt doc && echo "ScalaDoc generation successful" || (echo "ScalaDoc generation failed" && exit 1)
+      - name: Generate ScalaDoc for the backend
+        run: sbt backend/doc && echo "ScalaDoc generation successful" || (echo "ScalaDoc generation failed" && exit 1)
 
       - name: Move ScalaDoc to docs/website/public/scaladoc
         run: |
           mkdir -p docs/website/public/scaladoc
-          cp -r target/scala-*/api/* docs/website/public/scaladoc
+          cp -r backend/target/scala-*/api/* docs/website/public/backend/scaladoc
+
+      - name: Generate ScalaDoc for the frontend
+        run: sbt frontend/doc && echo "ScalaDoc generation successful" || (echo "ScalaDoc generation failed" && exit 1)
+
+      - name: Move ScalaDoc to docs/website/public/scaladoc
+        run: |
+          mkdir -p docs/website/public/scaladoc
+          cp -r frontend/target/scala-*/api/* docs/website/public/frontend/scaladoc
 
       - name: Generate Scoverage Report
         run: |

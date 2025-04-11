@@ -46,8 +46,28 @@
         {
           "assets": [
             {
-              "path": "target/scala-*/gitinsp.jar",
-              "label": "Executable JAR"
+              "path": "backend/target/scala-*/gitinsp-backend.jar",
+              "label": "Backend Executable JAR"
+            },
+            {
+              "path": "frontend/target/scala-*/gitinsp-frontend-opt/main.js",
+              "label": "Frontend JavaScript Main (optimized)"
+            },
+            {
+              "path": "frontend/target/scala-*/gitinsp-frontend-opt/gitinsp.-Git-Inspector-Frontend*.js",
+              "label": "Frontend Application JavaScript (optimized)"
+            },
+            {
+              "path": "frontend/target/scala-*/gitinsp-frontend-opt/internal-*.js",
+              "label": "Frontend Support JavaScript (optimized)"
+            },
+            {
+              "path": "index.html",
+              "label": "Frontend HTML"
+            },
+            {
+              "path": "style.css",
+              "label": "Frontend CSS"
             }
           ]
         }

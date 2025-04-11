@@ -72,6 +72,7 @@ class PipelineTest extends AnyFlatSpec with Matchers with MockitoSugar with Befo
     when(config.getInt("gitinsp.text-embedding.chunk-size")).thenReturn(1000)
     when(config.getInt("gitinsp.code-embedding.chunk-overlap")).thenReturn(200)
     when(config.getInt("gitinsp.text-embedding.chunk-overlap")).thenReturn(200)
+    when(config.getString("gitinsp.models.provider")).thenReturn("ollama")
 
   "Pipeline" should "allow dependency injection for easier testing" in:
     // Create mocks
